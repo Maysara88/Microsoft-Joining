@@ -1,0 +1,72 @@
+--1.	Retrieve customer orders
+o	As an initial step towards generating the invoice report, write a query that returns the company name from the SalesLT.Customer table, and the sales order ID 
+and total due from the SalesLT.SalesOrderHeader table
+THE_CODE:-
+SELECT C.CompanyName,O.SalesOrderID, O.TotalDue
+FROM [adventureworks].[SalesLT].[Customer] AS C 
+JOIN [adventureworks].[SalesLT].[SalesOrderHeader] AS O 
+  ON C.CustomerID= O.CustomerID
+
+--2.	Retrieve customer orders with addresses
+o	Extend your customer orders query to include the Main Office address for each customer, including the full street address, city, 
+state or province, postal code, and country or region
+
+THE CODE:-
+SELECT C.CompanyName,
+       O.SalesOrderID, 
+       O.TotalDue, 
+       A.AddressLine1,
+       ISNULL(A.AddressLine2,'') AS AddressLine_2,
+       A.City,
+       A.StateProvince,
+       A.CountryRegion,
+       A.PostalCode, 
+       CA.AddressType
+FROM [adventureworks].[SalesLT].[Customer] AS C 
+JOIN [adventureworks].[SalesLT].[SalesOrderHeader] AS O 
+  ON C.CustomerID= O.CustomerID
+JOIN [adventureworks].[SalesLT].[CustomerAddress] AS CA 
+  ON C.CustomerID= CA.CustomerID 
+JOIN [adventureworks].[SalesLT].[Address] AS A 
+  ON O.ShipToAddressID = A.AddressID
+WHERE CA.AddressType = 'Main Office'
+
+--3 1.	Retrieve a list of all customers and their orders
+o	The sales manager wants a list of all customer companies and their contacts (first name and last name), showing the sales order ID 
+and total due for each order they have placed. Customers who have not placed any orders 
+should be included at the bottom of the list with NULL values for the order ID and total due.
+
+THE CODE:-
+SELECT C.CompanyName,C.FirstName,C.LastName,O.SalesOrderID, O.TotalDue
+FROM [adventureworks].[SalesLT].[Customer] AS C 
+LEFT JOIN [adventureworks].[SalesLT].[SalesOrderHeader] AS O 
+  ON C.CustomerID= O.CustomerID
+ORDER BY o.SalesOrderID DESC, o.TotalDue DESC 
+
+--4- 2.	Retrieve a list of customers with no address
+o	A sales employee has noticed that Adventure Works does not have address information for all customers.
+You must write a query that returns a list of customer IDs, company names, contact names (first name and last name), 
+and phone numbers for customers with no address stored in the database.
+ 
+THE CODE:-
+SELECT c.CustomerID,C.CompanyName, C.FirstName+' '+C.LastName AS ContactName ,
+       C.Phone , CA.AddressID 
+FROM [adventureworks].[SalesLT].[Customer] AS C 
+LEFT JOIN  [adventureworks].[SalesLT].[CustomerAddress] AS CA
+  ON C.CustomerID = CA.CustomerID
+WHERE CA.AddressID IS NULL 
+
+--5- The marketing team has asked you to retrieve data for a new product catalog.
+1.	Retrieve product information by category
+o	The product catalog will list products by parent category and subcategory, so you must write a query that retrieves the parent category name, 
+subcategory name, and product name fields for the catalog.
+
+THE CODE:-
+SELECT pcat.Name AS ParentCategory, cat.Name AS SubCategory, prd.Name AS ProductName
+FROM SalesLT.ProductCategory pcat
+JOIN SalesLT.ProductCategory as cat
+    ON pcat.ProductCategoryID = cat.ParentProductCategoryID
+JOIN SalesLT.Product as prd
+    ON prd.ProductCategoryID = cat.ProductCategoryID
+ORDER BY ParentCategory, SubCategory, ProductName;
+
